@@ -7,4 +7,7 @@ PORT = int(sys.argv[2])  # The port used by the server
 FILENAME = sys.argv[3]
 
 if __name__ == '__main__':
-    sys.stderr.write("sike")
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        #print(s)
+        s.connect((HOST, PORT))
+        #print(s)
