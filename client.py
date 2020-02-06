@@ -8,6 +8,18 @@ FILENAME = sys.argv[3]
 
 if __name__ == '__main__':
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        #print(s)
-        s.connect((HOST, PORT))
-        #print(s)
+        try:
+            print(FILENAME)
+            s.connect((HOST, PORT))
+            print(s)  
+            sendFile = open(FILENAME, 'rb')
+            outData = sendFile.read(1024)
+            while outData:
+                s.send(outData)
+                outData = sendFile.read(1024)
+            sendFile.close()
+
+        except:
+            sys.stderr.write("ERROR: Connection not established\n")
+            s.close()
+            exit(1)

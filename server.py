@@ -2,28 +2,58 @@
 import socket
 import sys
 import os
-from _thread import start_new_thread
-import threading
 
 HOST = "localhost"
 PORT = int(sys.argv[1])  # The port used by the server
 FILEPATH = str(sys.argv[2])
 MIB = 13107200
+fileName = ''
 count = 0
-FileNum = 1
+
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 if __name__ == '__main__':
+    
+    if (FILEPATH[0] == '/'): # Trims the filepath to accept just 'save'
+        FILEPATH = FILEPATH[1:]
+
     if (PORT <= 1023):
-        sys.stderr.write("Invalid port number\n")
+        sys.stderr.write("ERROR: Invalid port number\n")
         exit(1)
 
+    sock.settimeout(3)
     sock.bind((HOST, PORT))
-    sock.listen(10)
-    print('Waiting for incoming connections on', sock)
+    sock.listen()
+    
     
     while True:
-        conn, addr = sock.accept()
-        count = count + 1
-        print('Connected to ', addr)
+        try:
+            print('Waiting for incoming connections')
+            conn, addr = sock.accept()
+            
+            count = count + 1
+            print('Connected to ', addr)
+
+            if (not os.path.exists(FILEPATH)):
+                os.makedirs(FILEPATH)
+            fileName = FILEPATH + '/' + str(count) + '.file'
+            data = conn.recv(MIB)
+
+
+            with open(fileName, 'wb') as f:
+                f.write(data)
+                data = conn.recv(MIB)
+
+                if not data:
+                    conn.send(b'End')
+                    conn.settimeout(3)
+                    conn.close()
+
+        except socket.timeout:
+            sys.stderr.write('ERROR: Socket timeout\n')
+            exit(1)
+
+    conn.close()
+    sock.close()
+    
