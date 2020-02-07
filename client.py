@@ -8,11 +8,11 @@ FILENAME = sys.argv[3]
 
 if __name__ == '__main__':
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        
         try:
-            print(FILENAME)
-            sock.settimeout(10)
+            s.settimeout(10)
             s.connect((HOST, PORT))
-            print(s)  
+            s.settimeout(None)
             sendFile = open(FILENAME, 'rb')
             outData = sendFile.read(1024)
             while outData:
