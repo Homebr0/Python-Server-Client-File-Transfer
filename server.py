@@ -15,14 +15,12 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 if __name__ == '__main__':
     
-    if (FILEPATH[0] == '/'): # Trims the filepath to accept just 'save'
-        FILEPATH = FILEPATH[1:]
+
 
     if (PORT <= 1023):
         sys.stderr.write("ERROR: Invalid port number\n")
         exit(1)
 
-    sock.settimeout(10)
     sock.bind((HOST, PORT))
     sock.listen()
     
