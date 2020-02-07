@@ -22,7 +22,7 @@ if __name__ == '__main__':
         sys.stderr.write("ERROR: Invalid port number\n")
         exit(1)
 
-    sock.settimeout(3)
+    sock.settimeout(10)
     sock.bind((HOST, PORT))
     sock.listen()
     

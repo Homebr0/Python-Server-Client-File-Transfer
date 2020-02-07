@@ -10,6 +10,7 @@ if __name__ == '__main__':
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         try:
             print(FILENAME)
+            sock.settimeout(10)
             s.connect((HOST, PORT))
             print(s)  
             sendFile = open(FILENAME, 'rb')
