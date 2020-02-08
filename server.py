@@ -61,7 +61,9 @@ if __name__ == '__main__':
     while True:
         try:
             print('Waiting for incoming connections')
+            sock.settimeout(10)
             conn, addr = sock.accept()
+            sock.setblocking(0)
             
             
             count = count + 1
