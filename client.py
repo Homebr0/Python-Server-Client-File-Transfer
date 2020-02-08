@@ -27,6 +27,8 @@ if __name__ == '__main__':
             s.sendall(length)
             s.sendall(outData)
             
+            s.close()
+            s = None
 
         except:
             sys.stderr.write("ERROR: Connection not established\n")
