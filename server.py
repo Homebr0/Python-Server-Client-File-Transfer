@@ -20,6 +20,7 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 def sockThread(conn):
     while True:
         try:
+            
             buffer = conn.recv(8)
             (length,) = unpack('>Q', buffer)
             data = b''
@@ -30,6 +31,7 @@ def sockThread(conn):
         finally:
             with open(fileName, 'wb') as f:
                 f.write(data)
+                conn.send(b'End')
                 print_lock.release()
                 break
                                
@@ -61,7 +63,7 @@ if __name__ == '__main__':
             print('Waiting for incoming connections')
             conn, addr = sock.accept()
             
-            print_lock.acquire()
+            
             count = count + 1
             print('Connected to ', addr)
 
@@ -69,6 +71,7 @@ if __name__ == '__main__':
                 os.makedirs(FILEPATH)
             fileName = FILEPATH + '/' + str(count) + '.file'
             
+            print_lock.acquire()
             start_new_thread(sockThread, (conn,))
 
         except socket.timeout:
