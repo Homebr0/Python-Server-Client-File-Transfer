@@ -24,7 +24,7 @@ def sockThread(conn):
             buffer = conn.recv(8)
             (length,) = unpack('>Q', buffer)
             data = b''
-            
+            print(fileName)
             while len(data) < length:
                 to_read = length - len(data)
                 data += conn.recv(4096 if to_read > 4096 else to_read)
@@ -32,16 +32,16 @@ def sockThread(conn):
             with open(fileName, 'wb') as f:
                 f.write(data)
                 conn.send(b'End')
-                print_lock.release()
+                #print_lock.release()
                 break
-                               
-        
-        #     data = conn.recv(MIB)
+                                
+            
+            #     data = conn.recv(MIB)
 
-        #     if not data:
-        #         conn.send(b'End')
-        #         print_lock.release()
-        #         break
+            #     if not data:
+            #         conn.send(b'End')
+            #         print_lock.release()
+            #         break
             
     conn.close()
 
@@ -61,9 +61,7 @@ if __name__ == '__main__':
     while True:
         try:
             print('Waiting for incoming connections')
-            sock.settimeout(10)
             conn, addr = sock.accept()
-            sock.setblocking(0)
             
             
             count = count + 1
@@ -73,13 +71,18 @@ if __name__ == '__main__':
                 os.makedirs(FILEPATH)
             fileName = FILEPATH + '/' + str(count) + '.file'
             
-            print_lock.acquire()
-            start_new_thread(sockThread, (conn,))
+            #print_lock.acquire()
+            t = threading.Thread(target=sockThread, args=(conn,))
+            #start_new_thread(sockThread, (conn,))
+            
+            t.start()
+            t.join()
 
         except socket.timeout:
             sys.stderr.write('ERROR: Socket timeout\n')
             exit(1)
 
-    sock.close()
+    sock.close()  
+            
     
 
