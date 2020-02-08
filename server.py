@@ -3,6 +3,7 @@ import socket
 import sys
 import os
 from _thread import *
+from struct import unpack
 import threading 
 
 HOST = "localhost"
@@ -18,17 +19,27 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 def sockThread(conn):
     while True:
-
-        data = conn.recv(MIB)
-
-        with open(fileName, 'wb') as f:
-            f.write(data)
-            data = conn.recv(MIB)
-
-            if not data:
-                conn.send(b'End')
+        try:
+            buffer = conn.recv(8)
+            (length,) = unpack('>Q', buffer)
+            data = b''
+            
+            while len(data) < length:
+                to_read = length - len(data)
+                data += conn.recv(4096 if to_read > 4096 else to_read)
+        finally:
+            with open(fileName, 'wb') as f:
+                f.write(data)
                 print_lock.release()
                 break
+                               
+        
+        #     data = conn.recv(MIB)
+
+        #     if not data:
+        #         conn.send(b'End')
+        #         print_lock.release()
+        #         break
             
     conn.close()
 
