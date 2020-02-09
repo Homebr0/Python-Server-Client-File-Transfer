@@ -18,34 +18,24 @@ print_lock = threading.Lock()
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 def sockThread(conn):
-    while True:
-        try:
+    
+    try:
+        buffer = conn.recv(8)
+        (length,) = unpack('>Q', buffer)
+        data = b''
+        print(fileName)
+        while len(data) < length:
+            to_read = length - len(data)
+            data += conn.recv(4096 if to_read > 4096 else to_read)
             
-            buffer = conn.recv(8)
-            (length,) = unpack('>Q', buffer)
-            data = b''
-            print(fileName)
-            while len(data) < length:
-                to_read = length - len(data)
-                data += conn.recv(4096 if to_read > 4096 else to_read)
-        finally:
-            with open(fileName, 'wb') as f:
-                f.write(data)
-                conn.send(b'End')
-                #print_lock.release()
-                break
-                                
+    finally:
+        conn.send(b'End')
+        conn.close()
+
+        with open(fileName, 'wb') as f:
+            f.write(data)
             
-            #     data = conn.recv(MIB)
-
-            #     if not data:
-            #         conn.send(b'End')
-            #         print_lock.release()
-            #         break
-            
-    conn.close()
-
-
+             
 
 if __name__ == '__main__':
     
@@ -55,7 +45,7 @@ if __name__ == '__main__':
         exit(1)
 
     sock.bind((HOST, PORT))
-    sock.listen()
+    sock.listen(5)
     
     
     while True:
@@ -71,9 +61,7 @@ if __name__ == '__main__':
                 os.makedirs(FILEPATH)
             fileName = FILEPATH + '/' + str(count) + '.file'
             
-            #print_lock.acquire()
             t = threading.Thread(target=sockThread, args=(conn,))
-            #start_new_thread(sockThread, (conn,))
             
             t.start()
             t.join()
