@@ -11,7 +11,7 @@ PORT = int(sys.argv[1])  # The port used by the server
 FILEPATH = str(sys.argv[2])
 MIB = 13107200
 fileName = ''
-count = 1
+count = 0
 
 print_lock = threading.Lock()
 
@@ -21,17 +21,11 @@ def sockThread(conn):
     
     with open(fileName, 'wb') as f:
         while True:
-            try:
-                data = conn.recv(4096)
-                if not data:
-                    break
-                f.write(data)
-            except conn.timeout:
-                print('ERROR: Socket timeout')
-                with open(fileName, 'wb') as errFile:
-                    errFile.write('ERROR')
-                    break
-
+            data = conn.recv(4096)
+            if not data:
+                break
+            f.write(data)
+        
     conn.close()
     
             
@@ -45,39 +39,32 @@ if __name__ == '__main__':
         exit(1)
 
     
-    try:
-        if (not os.path.exists(FILEPATH)):
-            os.makedirs(FILEPATH)
-        fileName = FILEPATH + '/' + str(count) + '.file'
-        sock.settimeout(5)
-        sock.bind((HOST, PORT))
-        sock.listen(5)
-        while True:
-        
-            print(sock)
+    sock.bind((HOST, PORT))
+    sock.listen(5)
+    
+    while True:
+        try:
             
-            fileName = FILEPATH + '/' + str(count) + '.file'
-            count = count + 1
-
             print('Waiting for incoming connections')
             conn, addr = sock.accept()
-            conn.settimeout(10)
             
             
+            count = count + 1
             print('Connected to ', addr)
 
+            if (not os.path.exists(FILEPATH)):
+                os.makedirs(FILEPATH)
+            fileName = FILEPATH + '/' + str(count) + '.file'
+            
             t = threading.Thread(target=sockThread, args=(conn,))
 
             t.start()
 
             t.join()
 
-    except socket.timeout:
-        sys.stderr.write('ERROR: Socket timeout\n')
-        
-        with open(fileName, 'wb') as errFile:
-            errFile.write(b'ERROR')
-        exit()
+        except socket.timeout:
+            sys.stderr.write('ERROR: Socket timeout\n')
+            exit(1)
 
     sock.close()  
             
