@@ -10,8 +10,6 @@ MIB = 13107200
 
 if __name__ == '__main__':
 
-    
-
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         
@@ -26,12 +24,6 @@ if __name__ == '__main__':
                     s.send(outData)
                     outData = readData.read(MIB)
     
-            # assert(len(outData))
-            # length = pack('>Q', len(outData))
-
-            # s.sendall(length)
-            # s.sendall(outData)
-            
             s.close()
             s = None
 

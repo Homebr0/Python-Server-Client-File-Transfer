@@ -11,7 +11,7 @@ PORT = int(sys.argv[1])  # The port used by the server
 FILEPATH = str(sys.argv[2])
 MIB = 13107200
 fileName = ''
-count = 0
+count = 1
 
 print_lock = threading.Lock()
 
@@ -19,34 +19,21 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 def sockThread(conn):
     
-
-    #data = conn.recv(MIB)
-    print('test 1')
     with open(fileName, 'wb') as f:
         while True:
-            print('test 2')
-            data = conn.recv(4096)
-            if not data:
-                break
-            f.write(data)
-        # data = conn.recv(MIB)
+            try:
+                data = conn.recv(4096)
+                if not data:
+                    break
+                f.write(data)
+            except conn.timeout:
+                print('ERROR: Socket timeout')
+                with open(fileName, 'wb') as errFile:
+                    errFile.write('ERROR')
+                    break
 
-        # if not data:
-        #     conn.send(b'End')
-        #     conn.close()
-
-    # (length,) = unpack('>Q', buffer)
-    
-    print('test 3')
     conn.close()
-    print('test 4')
-    # while len(data) < length:
-    #     to_read = length - len(data)
-    #     data += conn.recv(4096 if to_read > 4096 else to_read)
-            
     
-
-        
             
              
 
@@ -58,35 +45,39 @@ if __name__ == '__main__':
         exit(1)
 
     
-    sock.bind((HOST, PORT))
-    sock.listen(5)
-    
-    while True:
-        try:
+    try:
+        if (not os.path.exists(FILEPATH)):
+            os.makedirs(FILEPATH)
+        fileName = FILEPATH + '/' + str(count) + '.file'
+        sock.settimeout(5)
+        sock.bind((HOST, PORT))
+        sock.listen(5)
+        while True:
+        
             print(sock)
             
+            fileName = FILEPATH + '/' + str(count) + '.file'
+            count = count + 1
 
             print('Waiting for incoming connections')
             conn, addr = sock.accept()
+            conn.settimeout(10)
             
             
-            count = count + 1
             print('Connected to ', addr)
 
-            if (not os.path.exists(FILEPATH)):
-                os.makedirs(FILEPATH)
-            fileName = FILEPATH + '/' + str(count) + '.file'
-            
             t = threading.Thread(target=sockThread, args=(conn,))
-            print('thread start\n')
+
             t.start()
 
-            print('thread close\n')
             t.join()
 
-        except socket.timeout:
-            sys.stderr.write('ERROR: Socket timeout\n')
-            exit(1)
+    except socket.timeout:
+        sys.stderr.write('ERROR: Socket timeout\n')
+        
+        with open(fileName, 'wb') as errFile:
+            errFile.write(b'ERROR')
+        exit()
 
     sock.close()  
             
