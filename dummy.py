@@ -43,4 +43,4 @@ def fileName(size="UnknownSize"):
 
 
 
-data(500, "MiB", fileName("500MB"))
+data(8, "MiB", fileName("8MB"))
