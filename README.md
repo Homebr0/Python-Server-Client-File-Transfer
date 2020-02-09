@@ -1,28 +1,20 @@
 # CNT-4731 Project 1
 
-Template for for FIU CNT-4731 Fall 2019 Project 1
+Jason Davila
+PID: 4953994
 
-## Makefile
+# PROJECT REPORT
 
-Provides a `clean` target and `tarball` targets to create the submission file
+client.py
+The client is executed with three input parameters, hostname/IP address, port number, and the file to be read from. A socket is created, then connected to a server witht the corresponding port number. The file is opened and then its contents are sent in large chunks over to the server until there is no more data left to be read. once all the data is sent, the client's job is done in this case and the socket is closed.
 
-    make clean
-    make tarball
+server.py
+The entry point at the time of writing this report begins at around line 34. The first thing that we do is validate the port number to make sure it is above 1023. Then we bind to the host and port and listen for any valid connections. once we hit the forever loop, we hang out at accept() until we catch a client. Once we have one on the line, we create a directory to prep for the data we're about to recieve from the client (if a dir soes not already exist). We create a subthread of our data recieving method and begin running it. We open a file whose count depends on how many files were created before it, and we write the incoming clients' data into it. Once we stop recieving data, we close the connection and go back to listening for more clients.
 
-You will need to modify the `Makefile` to add your userid for the `.tar.gz` turn-in at the top of the file.
+PROBLEMS
+The most significant problem I ran into involved the struct module. Online I found an incredibly effective and simpler way to bridge my server and client using pack and unpack from struct (https://stackoverflow.com/questions/42459499/what-is-the-proper-way-of-sending-a-large-amount-of-data-over-sockets-in-python). I didn't think it counted as a high level solution so I implemented it. Despite working perfectly fine on my end, the autograder was not too happy with it. I was honestly stuck for about 4 hours trying to figure out why the autograder ketp failing me until I remembered that you're probably testing my server against other clients and vice versa, where the expected order and contents of the send and recv were different. Another issue I had is with timeouts in the client side. 
 
-## Academic Integrity Note
+RESOURCES
+https://stackoverflow.com/questions/42459499/what-is-the-proper-way-of-sending-a-large-amount-of-data-over-sockets-in-python
 
-You are encouraged to host your code in private repositories on [GitHub](https://github.com/), [GitLab](https://gitlab.com), or other places.  At the same time, you are PROHIBITED to make your code for the class project public during the class or any time after the class.  If you do so, you will be violating academic honestly policy that you have signed, as well as the student code of conduct and be subject to serious sanctions.
-
-## Provided Files
-
-`server.py` and `client.py` are the entry points for the server and client part of the project.
-
-## TODO
-
-    ###########################################################
-    ##                                                       ##
-    ## REPLACE CONTENT OF THIS FILE WITH YOUR PROJECT REPORT ##
-    ##                                                       ##
-    ###########################################################
+https://www.geeksforgeeks.org/socket-programming-multi-threading-python/
